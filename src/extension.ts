@@ -25,11 +25,14 @@ import { setUpGenerativeAiModel } from "./services/generative-ai-model-manager";
 import { getConfigValue } from "./utils";
 import { AnthropicWebViewProvider } from "./providers/anthropic-web-view-provider";
 import { MemoryCache } from "./services/memory";
+import { OllamaWebViewProvider } from "./providers/ollama-provider";
 
 const {
   geminiKey,
   geminiModel,
   groqKey,
+  ollamaKey,
+  ollamaModel,
   groqModel,
   anthropicApiKey,
   anthropicModel,
@@ -148,6 +151,13 @@ export async function activate(context: vscode.ExtensionContext) {
         key: groqKey,
         model: groqModel,
         webviewProviderClass: GroqWebViewProvider,
+        subscriptions,
+        quickFixCodeAction,
+      },
+      [generativeAiModel.OLLAMA]: {
+        key: ollamaKey,
+        model: ollamaModel,
+        webviewProviderClass: OllamaWebViewProvider,
         subscriptions,
         quickFixCodeAction,
       },

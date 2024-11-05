@@ -42,6 +42,9 @@ export const resetChatHistory = (model: string) => {
     case generativeAiModel.GROQ:
       MemoryCache.set(COMMON.GROQ_CHAT_HISTORY, []);
       break;
+    case generativeAiModel.OLLAMA:
+      MemoryCache.set(COMMON.OLLAMA_CHAT_HISTORY, []);
+      break;
     default:
       break;
   }

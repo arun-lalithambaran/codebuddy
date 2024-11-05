@@ -16,7 +16,8 @@ import {
   vscodeErrorMessage,
 } from "../utils";
 import { MemoryCache } from "../services/memory";
-
+import { OllamaWebViewProvider } from "../providers/ollama-provider";
+import { Ollama } from 'ollama';
 interface IEventGenerator {
   getApplicationConfig(configKey: string): string | undefined;
   showInformationMessage(): Thenable<string | undefined>;
@@ -31,6 +32,8 @@ export abstract class EventGenerator implements IEventGenerator {
   private readonly geminiModel: string;
   private readonly grokApiKey: string;
   private readonly grokModel: string;
+  private readonly ollamaApiKey: string;
+  private readonly ollamaModel: string;
   private readonly anthropicModel: string;
   private readonly anthropicApiKey: string;
   // Todo Need to refactor. Only one instance of a model can be created at a time. Therefore no need to retrieve all model information, only retrieve the required model within the application
@@ -47,6 +50,8 @@ export abstract class EventGenerator implements IEventGenerator {
       geminiModel,
       groqKey,
       groqModel,
+      ollamaKey,
+      ollamaModel,
       anthropicModel,
       anthropicApiKey,
     } = APP_CONFIG;
@@ -55,6 +60,8 @@ export abstract class EventGenerator implements IEventGenerator {
     this.geminiModel = getConfigValue(geminiModel);
     this.grokApiKey = getConfigValue(groqKey);
     this.grokModel = getConfigValue(groqModel);
+    this.ollamaApiKey = getConfigValue(ollamaKey);
+    this.ollamaModel = getConfigValue(ollamaModel);
     this.anthropicModel = getConfigValue(anthropicModel);
     this.anthropicApiKey = getConfigValue(anthropicApiKey);
   }
@@ -83,6 +90,17 @@ export abstract class EventGenerator implements IEventGenerator {
           );
         }
         model = this.createGroqModel(apiKey);
+      }
+
+      if (this.generativeAi === generativeAiModel.OLLAMA) {
+        const apiKey = this.ollamaApiKey;
+        modelName = this.ollamaModel;
+        if (!apiKey || !modelName) {
+          vscodeErrorMessage(
+            "Configuration not found. Go to settings, search for Your coding buddy. Fill up the model and model name",
+          );
+        }
+        model = this.createOllamaModel(apiKey);
       }
 
       if (this.generativeAi === generativeAiModel.GEMINI) {
@@ -136,6 +154,10 @@ export abstract class EventGenerator implements IEventGenerator {
     return new Groq({ apiKey });
   }
 
+  private createOllamaModel(apiKey: string): any {
+    return new Ollama({ host: 'http://127.0.0.1:11434' });
+  }
+
   protected async generateModelResponse(
     text: string,
   ): Promise<string | Anthropic.Messages.Message | undefined> {
@@ -162,6 +184,11 @@ export abstract class EventGenerator implements IEventGenerator {
         case "Groq":
           if (modelName) {
             response = await this.groqResponse(model, text, modelName);
+          }
+          break;
+        case "Ollama":
+          if (modelName) {
+            response = await this.ollamaResponse(model, text, modelName);
           }
           break;
         default:
@@ -254,6 +281,36 @@ export abstract class EventGenerator implements IEventGenerator {
     }
   }
 
+  private async ollamaResponse(
+    model: Ollama,
+    prompt: string,
+    generativeAiModel: string,
+  ): Promise<string | undefined> {
+    try {
+      const chatHistory = MemoryCache.has(COMMON.OLLAMA_CHAT_HISTORY)
+        ? MemoryCache.get(COMMON.OLLAMA_CHAT_HISTORY)
+        : [];
+      const params = {
+        messages: [
+          ...chatHistory,
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        model: generativeAiModel,
+      };
+      const response = await model.chat(params);
+      return response.message.content ?? undefined;
+    } catch (error) {
+      console.error("Error generating response:", error);
+      vscode.window.showErrorMessage(
+        "An error occurred while generating the response. Please try again.",
+      );
+      return;
+    }
+  }
+
   abstract formatResponse(comment: string): string;
 
   abstract createPrompt(text?: string): any;
@@ -312,6 +369,20 @@ export abstract class EventGenerator implements IEventGenerator {
             },
           ]);
           break;
+        case generativeAiModel.OLLAMA:
+          chatHistory = getLatestChatHistory(COMMON.OLLAMA_CHAT_HISTORY);
+          MemoryCache.set(COMMON.OLLAMA_CHAT_HISTORY, [
+            ...chatHistory,
+            {
+              role: "user",
+              content: prompt,
+            },
+            {
+              role: "system",
+              content: response,
+            },
+          ]);
+          break;
         case generativeAiModel.ANTHROPIC:
           chatHistory = getLatestChatHistory(COMMON.ANTHROPIC_CHAT_HISTORY);
           MemoryCache.set(COMMON.ANTHROPIC_CHAT_HISTORY, [
@@ -346,6 +417,13 @@ export abstract class EventGenerator implements IEventGenerator {
     }
     if (this.generativeAi === generativeAiModel.GROQ) {
       await GroqWebViewProvider.webView?.webview.postMessage({
+        type: "user-input",
+        message: formattedResponse,
+      });
+    }
+
+    if (this.generativeAi === generativeAiModel.OLLAMA) {
+      await OllamaWebViewProvider.webView?.webview.postMessage({
         type: "user-input",
         message: formattedResponse,
       });

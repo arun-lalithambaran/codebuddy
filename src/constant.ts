@@ -16,6 +16,7 @@ export enum OLA_ACTIONS {
 
 export enum COMMON {
   GROQ_CHAT_HISTORY = "groqChatHistory",
+  OLLAMA_CHAT_HISTORY = "ollamaChatHistory",
   GEMINI_CHAT_HISTORY = "geminiChatHistory",
   ANTHROPIC_CHAT_HISTORY = "anthropicChatHistory",
   USER_INPUT = "user-input",
@@ -34,6 +35,8 @@ export const APP_CONFIG = {
   geminiKey: "google.gemini.apiKeys",
   geminiModel: "google.gemini.model",
   groqKey: "groq.llama3.apiKey",
+  ollamaKey: "ollama.llama3.apiKey",
+  ollamaModel: "ollama.llama3.model",
   groqModel: "groq.llama3.model",
   generativeAi: "generativeAi.option",
   anthropicModel: "anthropic.model",
@@ -44,6 +47,7 @@ export enum generativeAiModel {
   GEMINI = "Gemini",
   GROQ = "Groq",
   ANTHROPIC = "Anthropic",
+  OLLAMA = "Ollama"
 }
 
 export const MEMORY_CACHE_OPTIONS = {

@@ -9,6 +9,7 @@ import { GroqWebViewProvider } from "../providers/groq-web-view-provider";
 import { GeminiWebViewProvider } from "../providers/gemini-web-view-provider";
 import { APP_CONFIG, COMMON, generativeAiModel } from "../constant";
 import { AnthropicWebViewProvider } from "../providers/anthropic-web-view-provider";
+import { OllamaWebViewProvider } from "../providers/ollama-provider";
 
 /**
  * Manages chat functionality, including registering chat commands,
@@ -22,6 +23,8 @@ export class ChatManager {
   private readonly geminiModel: string;
   private readonly grokApiKey: string;
   private readonly grokModel: string;
+  private readonly ollamaApiKey: string;
+  private readonly ollamaModel: string;
   private readonly generativeAi: string;
   private readonly anthropicApiKey: string;
   private readonly anthropicModel: string;
@@ -32,6 +35,8 @@ export class ChatManager {
       geminiModel,
       groqKey,
       groqModel,
+      ollamaKey,
+      ollamaModel,
       generativeAi,
       anthropicApiKey,
       anthropicModel,
@@ -41,6 +46,8 @@ export class ChatManager {
     this.geminiModel = getConfigValue(geminiModel);
     this.grokApiKey = getConfigValue(groqKey);
     this.grokModel = getConfigValue(groqModel);
+    this.ollamaApiKey = getConfigValue(ollamaKey);
+    this.ollamaModel = getConfigValue(ollamaModel);
     this.anthropicApiKey = getConfigValue(anthropicApiKey);
     this.anthropicModel = getConfigValue(anthropicModel);
     this.generativeAi = getConfigValue(generativeAi);
@@ -93,6 +100,20 @@ export class ChatManager {
         );
         return await chatViewProvider.generateResponse(message);
       }
+      if (generativeAi === "Ollama") {
+        if (!this.ollamaApiKey || !this.ollamaModel) {
+          vscodeErrorMessage(
+            "Configuration not found. Go to settings, search for Your coding buddy. Fill up the model and model name",
+          );
+        }
+        const chatViewProvider = new OllamaWebViewProvider(
+          this._context.extensionUri,
+          this.grokApiKey,
+          this.grokModel,
+          this._context,
+        );
+        return await chatViewProvider.generateResponse(message);
+      }
       if (generativeAi === "Gemini") {
         if (!this.geminiApiKey || !this.geminiModel) {
           vscodeErrorMessage(
@@ -136,6 +157,16 @@ export class ChatManager {
     try {
       if (this.generativeAi === generativeAiModel.GROQ) {
         const chatViewProvider = new GroqWebViewProvider(
+          this._context.extensionUri,
+          this.grokApiKey,
+          this.grokModel,
+          this._context,
+        );
+        chatViewProvider.sendResponse(formatText(userInput), COMMON.USER_INPUT);
+        chatViewProvider.sendResponse(formatText(response), COMMON.BOT);
+      }
+      if (this.generativeAi === generativeAiModel.OLLAMA) {
+        const chatViewProvider = new OllamaWebViewProvider(
           this._context.extensionUri,
           this.grokApiKey,
           this.grokModel,

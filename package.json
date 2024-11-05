@@ -167,7 +167,8 @@
             "enum": [
               "Gemini",
               "Groq",
-              "Anthropic"
+              "Anthropic",
+              "Ollama"
             ],
             "default": "Groq",
             "description": "Select the Generative AI to use with code buddy"
@@ -203,6 +204,22 @@
             ],
             "default": null,
             "markdownDescription": "Provide the name of the Groq model you want to use. Choose from the ..."
+          },
+          "ollama.llama3.apiKey": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": "llama3.2",
+            "markdownDescription": "Enter your [API Key] llama3.2"
+          },
+          "ollama.llama3.model": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": "llama3.2",
+            "markdownDescription": "Provide the name of the llama model you want to use. Choose from the ..."
           },
           "anthropic.model": {
             "type": [
@@ -299,6 +316,7 @@
     "groq-sdk": "^0.3.2",
     "markdown-it": "^14.1.0",
     "node-fetch": "^3.3.2",
+    "ollama": "^0.5.9",
     "prettier": "^3.2.5",
     "readable-stream": "^4.5.2",
     "simple-git": "^3.25.0",
