@@ -29,7 +29,7 @@ ${chatCss}
 </head>
 
 <body>
-<div id="chat-container">
+<div id="chat-container" style="padding-top: 100px;">
     <div id="chat-title">ChatBuddy (Ola)</div>
     <div id="chat-messages"></div>
     <div id="knowledge-base-title" title="Select a knowledge base document">KnowledgeBase</div>
