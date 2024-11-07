@@ -298,10 +298,20 @@ export abstract class EventGenerator implements IEventGenerator {
             content: prompt,
           },
         ],
+        stream: true,
         model: generativeAiModel,
       };
-      const response = await model.chat(params);
-      return response.message.content ?? undefined;
+      // return `In the comments, I have tried to be concise while still conveying the intent behind each section of code. The comments describe what a developer would need to know in order to write this code from scratch, without providing unnecessary information that's already apparent from the code itself.;`
+      console.log("Prompt initiated");
+      const response: any = await model.chat(params as  any);
+      console.log("prompt completed");
+      // return response.message.content ?? undefined;
+      let output = "";
+      for await (const part of response) {
+        output += part.message.content;
+        process.stdout.write(part.message.content);
+      }
+      return output ?? undefined;
     } catch (error) {
       console.error("Error generating response:", error);
       vscode.window.showErrorMessage(
