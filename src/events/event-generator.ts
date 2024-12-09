@@ -155,7 +155,7 @@ export abstract class EventGenerator implements IEventGenerator {
   }
 
   private createOllamaModel(apiKey: string): any {
-    return new Ollama({ host: 'http://127.0.0.1:11434' });
+    return new Ollama({ host: 'http://172.16.0.197:11434' });
   }
 
   protected async generateModelResponse(
