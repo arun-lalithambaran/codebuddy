@@ -153,7 +153,7 @@ export class ChatManager {
     }
   }
 
-  private sendResponse(userInput: string, response: string | undefined) {
+  public sendResponse(userInput: string, response: string | undefined) {
     try {
       if (this.generativeAi === generativeAiModel.GROQ) {
         const chatViewProvider = new GroqWebViewProvider(
@@ -169,7 +169,7 @@ export class ChatManager {
         const chatViewProvider = new OllamaWebViewProvider(
           this._context.extensionUri,
           this.grokApiKey,
-          this.grokModel,
+          this.ollamaModel,
           this._context,
         );
         chatViewProvider.sendResponse(formatText(userInput), COMMON.USER_INPUT);

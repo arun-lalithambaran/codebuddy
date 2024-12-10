@@ -50,6 +50,7 @@ chatSendButton.addEventListener("click", () => {
 });
 
 function addChatMessage(sender, message) {
+chatMessages.innerHTML="";
   const messageContainer = document.createElement("div");
   messageContainer.classList.add("chat-message-container");
 

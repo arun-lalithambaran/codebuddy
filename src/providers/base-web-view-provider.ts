@@ -66,6 +66,8 @@ export abstract class BaseWebViewProvider {
           if (response) {
             this.sendResponse(formatText(response), "bot");
           }
+        } else {
+          
         }
       });
     } catch (error) {

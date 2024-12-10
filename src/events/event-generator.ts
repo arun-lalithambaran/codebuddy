@@ -18,6 +18,7 @@ import {
 import { MemoryCache } from "../services/memory";
 import { OllamaWebViewProvider } from "../providers/ollama-provider";
 import { Ollama } from 'ollama';
+import { ChatManager } from "../services/chat-manager";
 interface IEventGenerator {
   getApplicationConfig(configKey: string): string | undefined;
   showInformationMessage(): Thenable<string | undefined>;
@@ -124,6 +125,10 @@ export abstract class EventGenerator implements IEventGenerator {
   }
 
   showInformationMessage(): Thenable<string | undefined> {
+    OllamaWebViewProvider.webView?.webview.postMessage({
+      type: "user-input",
+      message: this.action,
+    });
     return vscode.window.showInformationMessage(this.action);
   }
 
@@ -303,7 +308,7 @@ export abstract class EventGenerator implements IEventGenerator {
       };
       // return `In the comments, I have tried to be concise while still conveying the intent behind each section of code. The comments describe what a developer would need to know in order to write this code from scratch, without providing unnecessary information that's already apparent from the code itself.;`
       console.log("Prompt initiated");
-      const response: any = await model.chat(params as  any);
+      const response: any = await model.chat(params as any);
       console.log("prompt completed");
       // return response.message.content ?? undefined;
       let output = "";
@@ -414,7 +419,7 @@ export abstract class EventGenerator implements IEventGenerator {
     return response;
   }
 
-  async execute(errorMessage?: string): Promise<void> {
+  async execute_old(errorMessage?: string): Promise<void> {
     const response = (await this.generateResponse(errorMessage)) as string;
     if (!response) {
       vscode.window.showErrorMessage("model not reponding, try again later");
@@ -452,5 +457,44 @@ export abstract class EventGenerator implements IEventGenerator {
         message: formattedResponse,
       });
     }
+  }
+
+  async execute(errorMessage?: string): Promise<void> {
+    this.showInformationMessage();
+    const selectedCode = this.getSelectedWindowArea();
+    let prompt = await this.createPrompt(selectedCode);
+    const model = this.createOllamaModel("apiKey");
+    console.log("Prompt initiated");
+    const params = {
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        }
+      ],
+      stream: true,
+      model: "llama3.2",
+    };
+    const response: any = await model.chat(params as any);
+    let chatManager = new ChatManager(this.context);
+    console.log("prompt completed");
+    // return response.message.content ?? undefined;
+    let output = "";
+    for await (const part of response) {
+      output += part.message.content;
+      process.stdout.write(part.message.content);
+      const formattedOutput = this.formatResponse(output);
+      // await OllamaWebViewProvider.webView?.webview.html
+      await OllamaWebViewProvider.webView?.webview.postMessage({
+        type: "user-input",
+        message: formattedOutput,
+        
+      });
+      // chatManager.sendResponse(prompt, part.message.content);
+    }
+    // if (this.action.includes("chart")) {
+    //   output = this.cleanGraphString(output as string);
+    // }
+
   }
 }

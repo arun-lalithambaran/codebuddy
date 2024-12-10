@@ -1,4 +1,4 @@
-export const USER_MESSAGE = " ☕️ Hold on while CodeBuddy ";
+export const USER_MESSAGE = " ☕️ Hold on while the AI model ";
 export enum OLA_ACTIONS {
   comment = "ola.commentCode",
   review = "ola.reviewCode",

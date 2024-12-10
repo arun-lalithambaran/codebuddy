@@ -32,16 +32,16 @@ ${chatCss}
 <div id="chat-container" style="padding-top: 100px;">
     <div id="chat-title">ChatBuddy (Ola)</div>
     <div id="chat-messages"></div>
-    <div id="knowledge-base-title" title="Select a knowledge base document">KnowledgeBase</div>
-    <div id="knowledge-base">
+    <div style="visibility:hidden" id="knowledge-base-title" title="Select a knowledge base document">KnowledgeBase</div>
+    <div style="visibility:hidden" id="knowledge-base">
          <select id="chat-options">
            ${docs.map((doc) => `<option value="${doc}">${path.basename(doc)}</option>`)}
         </select>
     </div>
-    <div id="chat-input-container">
+    <div style="visibility:hidden" id="chat-input-container">
         <input id="chat-input" type="text" placeholder="The text area is diabled. Type in vscode window or highlight code and right click" />
     </div>
-    <button id="chat-send">Send</button>
+    <button style="visibility:hidden" id="chat-send">Send</button>
     <div id="loading">
         <div class="loader"></div>
         <div class="loader"></div>
